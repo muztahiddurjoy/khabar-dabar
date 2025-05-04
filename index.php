@@ -517,68 +517,39 @@ if (!isset($_SESSION['user_id'])) {
       
         <div id="feedback" class="tab-content">
             <div class="card">
-                <div class="card-header">My Feedback</div>
-                <div class="card-body">
-                    <div class="feedback-item">
+            <div class="card-header">My Feedback</div>
+            <div class="card-body">
+                <?php
+                $user_id = $_SESSION['user_id'];
+                $sql = "SELECT f.*, fi.name AS food_name FROM feedback f 
+                    JOIN food_items fi ON f.food_item_id = fi.food_item_id 
+                    WHERE f.user_id = '$user_id'";
+                $result = mysqli_query($conn, $sql);
+                if ($result && mysqli_num_rows($result) > 0) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo '<div class="feedback-item">
                         <div class="feedback-header">
-                            <div class="feedback-food">Chicken Biryani</div>
-                            <div class="feedback-date">Apr 27, 2025</div>
+                        <div class="feedback-food">' . htmlspecialchars($row["food_name"]) . '</div>
+                        <div class="feedback-date">' . date("M d, Y", strtotime($row["created_at"])) . '</div>
                         </div>
                         <div class="feedback-rating">
-                            <div class="stars">
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star">★</span>
-                            </div>
-                            <div class="rating-count">4.0</div>
+                        <div class="stars">';
+                    for ($i = 1; $i <= 5; $i++) {
+                    echo '<span class="star' . ($i <= $row["rating"] ? ' filled' : '') . '">★</span>';
+                    }
+                    echo '      </div>
+                        <div class="rating-count">' . htmlspecialchars($row["rating"]) . '.0</div>
                         </div>
                         <div class="feedback-comment">
-                            The Chicken Biryani was delicious! The rice was perfectly cooked and the chicken was tender. I would recommend adding a bit more spice to enhance the flavor.
+                        ' . htmlspecialchars($row["comment"]) . '
                         </div>
-                    </div>
-                    
-                    <div class="feedback-item">
-                        <div class="feedback-header">
-                            <div class="feedback-food">Beef Kala Bhuna</div>
-                            <div class="feedback-date">Apr 24, 2025</div>
-                        </div>
-                        <div class="feedback-rating">
-                            <div class="stars">
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                            </div>
-                            <div class="rating-count">5.0</div>
-                        </div>
-                        <div class="feedback-comment">
-                            One of the best Beef Kala Bhuna I've had! The meat was tender and the gravy was rich and flavorful. Will definitely order again.
-                        </div>
-                    </div>
-                    
-                    <div class="feedback-item">
-                        <div class="feedback-header">
-                            <div class="feedback-food">Kacchi Mutton Biryani</div>
-                            <div class="feedback-date">Apr 20, 2025</div>
-                        </div>
-                        <div class="feedback-rating">
-                            <div class="stars">
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star filled">★</span>
-                                <span class="star">★</span>
-                                <span class="star">★</span>
-                            </div>
-                            <div class="rating-count">3.0</div>
-                        </div>
-                        <div class="feedback-comment">
-                            The Kacchi Mutton Biryani was average. The mutton was a bit too tough and the rice wasn't as flavorful as I expected. The portion size was good though.
-                        </div>
-                    </div>
-                </div>
+                    </div>';
+                }
+                } else {
+                echo '<p>No feedback found.</p>';
+                }
+                ?>
+            </div>
             </div>
         </div>
         
@@ -587,17 +558,27 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="card-header">Give Feedback</div>
                 <div class="card-body">
                     <div class="add-feedback">
-                        <form>
+                        <form action="#" method="POST">
                             <div>
                                 <label for="food-item">Select Food Item:</label>
-                                <select id="food-item">
+                                <select id="food-item" name="food_item_id" required>
                                     <option value="">-- Select an item --</option>
-                                    <option value="chicken-biryani">Chicken Biryani</option>
-                                    <option value="beef-kala-bhuna">Beef Kala Bhuna</option>
-                                    <option value="mutton-biryani">Kacchi Mutton Biryani</option>
-                                    <option value="shorshe-ilish">Shorshe Ilish</option>
-                                    <option value="mixed-vegetable">Mixed Vegetable Curry</option>
-                                    <option value="chicken-jhal-fry">Chicken Jhal Fry</option>
+                                    <?php
+                                    $user_id = $_SESSION['user_id'];
+                                    $sql = "SELECT DISTINCT atc.food_item_id, fi.name 
+                                            FROM add_to_cart atc 
+                                            JOIN food_items fi ON atc.food_item_id = fi.food_item_id 
+                                            LEFT JOIN feedback fb ON atc.food_item_id = fb.food_item_id AND atc.user_id = fb.user_id 
+                                            WHERE atc.user_id = '$user_id' AND fb.food_item_id IS NULL";
+                                    $result = mysqli_query($conn, $sql);
+                                    if ($result && mysqli_num_rows($result) > 0) {
+                                        while ($row = mysqli_fetch_assoc($result)) {
+                                            echo '<option value="' . htmlspecialchars($row["food_item_id"]) . '">' . htmlspecialchars($row["name"]) . '</option>';
+                                        }
+                                    } else {
+                                        echo '<option value="">No items available for feedback</option>';
+                                    }
+                                    ?>
                                 </select>
                             </div>
                             
@@ -611,95 +592,35 @@ if (!isset($_SESSION['user_id'])) {
                                         <span class="star" onclick="setRating(4)">★</span>
                                         <span class="star" onclick="setRating(5)">★</span>
                                     </div>
+                                    <input type="hidden" name="rating" id="rating" value="0" required>
                                 </div>
                             </div>
                             
                             <div>
                                 <label for="comment">Your Comments:</label>
-                                <textarea id="comment" placeholder="Share your experience with this food item..."></textarea>
+                                <textarea id="comment" name="comment" placeholder="Share your experience with this food item..." required></textarea>
                             </div>
                             
                             <button type="submit" class="btn">Submit Feedback</button>
                         </form>
                     </div>
-                    
-                    <div class="page-title">Example: How ratings appear on food items</div>
-                    <div class="food-grid">
-                        <div class="food-card">
-                            <img src="/api/placeholder/400/320" alt="Chicken Biryani" class="food-img">
-                            <div class="food-info">
-                                <div class="food-name">Chicken Biryani</div>
-                                <div class="food-price">৳180</div>
-                                <div class="food-rating">
-                                    <div class="stars">
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star">★</span>
-                                    </div>
-                                    <div class="rating-count">(4.0) 28 reviews</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="food-card">
-                            <img src="/api/placeholder/400/320" alt="Beef Kala Bhuna" class="food-img">
-                            <div class="food-info">
-                                <div class="food-name">Beef Kala Bhuna</div>
-                                <div class="food-price">৳250</div>
-                                <div class="food-rating">
-                                    <div class="stars">
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                    </div>
-                                    <div class="rating-count">(4.😎 36 reviews</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="food-card">
-                            <img src="/api/placeholder/400/320" alt="Kacchi Mutton Biryani" class="food-img">
-                            <div class="food-info">
-                                <div class="food-name">Kacchi Mutton Biryani</div>
-                                <div class="food-price">৳320</div>
-                                <div class="food-rating">
-                                    <div class="stars">
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star half-filled">★</span>
-                                        <span class="star">★</span>
-                                    </div>
-                                    <div class="rating-count">(3.5) 42 reviews</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="food-card">
-                            <img src="/api/placeholder/400/320" alt="Shorshe Ilish" class="food-img">
-                            <div class="food-info">
-                                <div class="food-name">Shorshe Ilish</div>
-                                <div class="food-price">৳380</div>
-                                <div class="food-rating">
-                                    <div class="stars">
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star filled">★</span>
-                                        <span class="star">★</span>
-                                    </div>
-                                    <div class="rating-count">(4.2) 18 reviews</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            function setRating(rating) {
+                var stars = document.querySelectorAll("#add-feedback .stars .star");
+                for (var i = 0; i < stars.length; i++) {
+                    if (i < rating) {
+                        stars[i].classList.add("filled");
+                    } else {
+                        stars[i].classList.remove("filled");
+                    }
+                }
+                document.getElementById("rating").value = rating;
+            }
+        </script>
     
     </div>
 
