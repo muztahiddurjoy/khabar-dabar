@@ -1,3 +1,11 @@
+<?php
+require_once('connect.php');
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login_page.php");
+    exit();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -346,33 +354,49 @@
             <div class="tab" onclick="openTab('add-feedback')">Give Feedback</div>
         </div>
         
-        <div id="profile" class="tab-content active">
-            <div class="card">
-                <div class="card-header">User Details</div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <div class="info-label">Username:</div>
-                        <div class="info-value">karim123</div>
+        <?php
+        $user_id = $_SESSION['user_id'];
+        // Fetch user profile data
+        $sql = "SELECT * FROM users WHERE user_id = '$user_id'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            if (mysqli_num_rows($result) > 0) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    echo '<div id="profile" class="tab-content active">
+                    <div class="card">
+                        <div class="card-header">User Details</div>
+                        <div class="card-body">
+                            <div class="info-row">
+                                <div class="info-label">User ID:</div>
+                                <div class="info-value">'.$user_id.'</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Username:</div>
+                                <div class="info-value">'.$row["username"].'</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Mobile:</div>
+                                <div class="info-value">'.$row["mobile_number"].'</div>
+                            </div>
+                            <div class="info-row">
+                                <div class="info-label">Account Type:</div>
+                                <div class="info-value">'.$row["user_type"].'</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Full Name:</div>
-                        <div class="info-value">Abdul Karim</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Mobile:</div>
-                        <div class="info-value">+880 1712-345678</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Email:</div>
-                        <div class="info-value">karim@example.com</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Member Since:</div>
-                        <div class="info-value">January 15, 2023</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                </div>';
+                }
+            } else {
+                echo "No results found.";
+            }
+        
+           
+            
+        } else {
+            echo "Error fetching user data.";
+            exit();
+        }
+        ?>
         
         <div id="orders" class="tab-content">
             <div class="card">

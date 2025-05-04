@@ -10,15 +10,26 @@ if (isset($_POST['Username']) && isset($_POST['Password']) && isset($_POST['Mobi
     $mobile = $_POST['Mobile'];
 
     // Write the query to check if this username, password and mobile exists in our database
-    $sql = "SELECT * FROM client WHERE Username = '$username' AND Password = '$password' AND Mobile = '$mobile'";
+    $sql = "SELECT * FROM users WHERE username = '$username' AND password= '$password' AND mobile_number='$mobile'";
     
     // Execute the query
     $result = mysqli_query($conn, $sql);
 
     if ($result && mysqli_num_rows($result) != 0) {
-        // Login successful, redirect to home page
-        header("Location: home_page.php");
-        exit();
+        if (mysqli_num_rows($result) > 0) {
+            session_start();
+            $_SESSION['loggedin'] = true;
+            $_SESSION['username'] = $username;
+            while ($row = mysqli_fetch_assoc($result)) {
+                $_SESSION['user_id'] = $row['user_id'];
+                $_SESSION['mobile'] = $row['Mobile'];
+            }
+            
+            // Login successful, redirect to home page
+            header("Location: index.php");
+            exit();
+        }
+       
     } else {
         // Check which credential is wrong
         // First check username
