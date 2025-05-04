@@ -350,6 +350,7 @@ if (!isset($_SESSION['user_id'])) {
         <div class="tabs">
             <div class="tab active" onclick="openTab('profile')">Profile</div>
             <div class="tab" onclick="openTab('orders')">Order History</div>
+            <div class="tab" onclick="openTab('booking')">My Reservations</div>
             <div class="tab" onclick="openTab('feedback')">My Feedback</div>
             <div class="tab" onclick="openTab('add-feedback')">Give Feedback</div>
         </div>
@@ -397,77 +398,123 @@ if (!isset($_SESSION['user_id'])) {
             exit();
         }
         ?>
-        
-        <div id="orders" class="tab-content">
-            <div class="card">
-                <div class="card-header">Order History</div>
-                <div class="card-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Order ID</th>
-                                <th>Date</th>
-                                <th>Items</th>
-                                <th>Total Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>#ORD-5723</td>
-                                <td>Apr 27, 2025</td>
-                                <td>Chicken Biryani, Borhani</td>
-                                <td>৳280</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-5694</td>
-                                <td>Apr 24, 2025</td>
-                                <td>Beef Kala Bhuna, Paratha (2)</td>
-                                <td>৳350</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-5650</td>
-                                <td>Apr 20, 2025</td>
-                                <td>Kacchi Mutton Biryani, Firni</td>
-                                <td>৳450</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-5601</td>
-                                <td>Apr 15, 2025</td>
-                                <td>Mixed Vegetable Curry, Plain Rice</td>
-                                <td>৳180</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-5532</td>
-                                <td>Apr 10, 2025</td>
-                                <td>Shorshe Ilish, Plain Rice</td>
-                                <td>৳380</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-5489</td>
-                                <td>Apr 05, 2025</td>
-                                <td>Chicken Jhal Fry, Naan (3)</td>
-                                <td>৳320</td>
-                                <td class="status-cancelled">Cancelled</td>
-                            </tr>
-                            <tr>
-                                <td>#ORD-5432</td>
-                                <td>Mar 30, 2025</td>
-                                <td>Special Thali Meal</td>
-                                <td>৳500</td>
-                                <td class="status-completed">Completed</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+<div id="orders" class="tab-content">
+                    <div class="card">
+                        <div class="card-header">Order History</div>
+                        <div class="card-body">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Item</th>
+                                        <th>Total Cost</th>
+                                        <th>Qauntity</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+<?php
+        $user_id = $_SESSION['user_id'];
+        // Fetch user profile data
+        $sql = "SELECT * FROM add_to_cart WHERE user_id = '$user_id'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            if (mysqli_num_rows($result) > 0) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $sql2 = 'SELECT * FROM food_items WHERE food_item_id= "'.$row["food_item_id"].'"';
+                                        $result2 = mysqli_query($conn, $sql2);
+                                        if ($result2 && mysqli_num_rows($result2) > 0) {
+                                            while ($row2 = mysqli_fetch_assoc($result2)) {
+                                                echo '<tr>
+                                                
+                                                <td>#ORD-'.$row["token_id"].'</td>
+                                                <td>'.$row2["name"].'</td>
+                                                <td>'.$row2["amount"]*$row['quantity'].' BDT</td>
+                                                            <td>'.$row['quantity'].'</td>
+                                                <td class="status-completed">'.$row["payment_status"].'</td>
+                                                
+                                                </tr>
+                                                ';
+                                            }
+                                        } else {    
+                                            echo "No results found.";
+                                        }
+                    
+                }
+            } else {
+                echo "No results found.";
+            }
+        }
+        else {
+            echo "Error fetching user data.";
+        }
+            ?>
+              </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+
+                <div class="tab-content" id="booking">
+        <div class="card">
+                <div class="card-header">My Reservations</div>
+                <div class="card-body">
+    <?php
+        $user_id = $_SESSION['user_id'];
+        // Fetch user profile data  
+        $sql = "SELECT * FROM advance_booking WHERE user_id = '$user_id'";
+        $result = mysqli_query($conn, $sql);
+        if ($result && mysqli_num_rows($result) > 0) {
+            if (mysqli_num_rows($result) > 0) {
+                while ($row = mysqli_fetch_assoc($result)) {
+                    $sql2 = 'SELECT * FROM food_items WHERE food_item_id= "'.$row["food_item_id"].'"';
+                                        $result2 = mysqli_query($conn, $sql2);
+                                        if ($result2 && mysqli_num_rows($result2) > 0) {
+                                            while ($row2 = mysqli_fetch_assoc($result2)) {
+                                                echo '<div class="info-row">
+                                                        <div class="info-label">Booking ID:</div>
+                                                        <div class="info-value">#BOOK-'.$row["booking_token"].'</div>
+                                                    </div>
+                                                    <div class="info-row">
+                                                        <div class="info-label">Booking Date:</div>
+                                                        <div class="info-value">'.$row["booking_date"].'</div>
+                                                    </div>
+                                                    <div class="info-row">
+                                                        <div class="info-label">Booking Time:</div>
+                                                        <div class="info-value">'.$row["booking_time"].'</div>
+                                                    </div>
+                                                    <div class="info-row">
+                                                        <div class="info-label">Item:</div>
+                                                        <div class="info-value">'.$row2["name"].'</div>
+                                                    </div>
+                                                    <div class="info-row">
+                                                        <div class="info-label">Total Cost:</div>
+                                                        <div class="info-value">'.$row2["amount"]*$row["quantity"].' BDT</div>
+                                                    </div>
+                                                    <div class="info-row">
+                                                        <div class="info-label">Qauntity:</div>
+                                                        <div class="info-value">'.$row["quantity"].'</div>
+                                                    </div>
+                                                    ';
+                                            }
+                                        } else {
+                                            echo "No results found.";
+                                        }
+                }
+            } else {
+                echo "No results found.";
+            }
+        }
+        ?>
+
+                </div>
+    
             </div>
         </div>
+
         
+      
         <div id="feedback" class="tab-content">
             <div class="card">
                 <div class="card-header">My Feedback</div>
@@ -653,6 +700,7 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
             </div>
         </div>
+    
     </div>
 
     <div class="footer">
