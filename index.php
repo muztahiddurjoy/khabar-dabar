@@ -558,14 +558,14 @@ if (!isset($_SESSION['user_id'])) {
                 <div class="card-header">Give Feedback</div>
                 <div class="card-body">
                     <div class="add-feedback">
-                        <form action="#" method="POST">
+                        <form action="feedback.php" method="POST">
                             <div>
                                 <label for="food-item">Select Food Item:</label>
-                                <select id="food-item" name="food_item_id" required>
+                                <select id="food-item" name="order_id" required>
                                     <option value="">-- Select an item --</option>
                                     <?php
                                     $user_id = $_SESSION['user_id'];
-                                    $sql = "SELECT DISTINCT atc.food_item_id, fi.name 
+                                    $sql = "SELECT *
                                             FROM add_to_cart atc 
                                             JOIN food_items fi ON atc.food_item_id = fi.food_item_id 
                                             LEFT JOIN feedback fb ON atc.food_item_id = fb.food_item_id AND atc.user_id = fb.user_id 
@@ -573,7 +573,7 @@ if (!isset($_SESSION['user_id'])) {
                                     $result = mysqli_query($conn, $sql);
                                     if ($result && mysqli_num_rows($result) > 0) {
                                         while ($row = mysqli_fetch_assoc($result)) {
-                                            echo '<option value="' . htmlspecialchars($row["food_item_id"]) . '">' . htmlspecialchars($row["name"]) . '</option>';
+                                            echo '<option value="' . htmlspecialchars($row["token_id"]) . '">' . htmlspecialchars($row["name"]). '</option>';
                                         }
                                     } else {
                                         echo '<option value="">No items available for feedback</option>';
@@ -598,7 +598,7 @@ if (!isset($_SESSION['user_id'])) {
                             
                             <div>
                                 <label for="comment">Your Comments:</label>
-                                <textarea id="comment" name="comment" placeholder="Share your experience with this food item..." required></textarea>
+                                <textarea id="comment" name="feedback" placeholder="Share your experience with this food item..." required></textarea>
                             </div>
                             
                             <button type="submit" class="btn">Submit Feedback</button>
