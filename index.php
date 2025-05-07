@@ -530,7 +530,6 @@ if (!isset($_SESSION['user_id'])) {
                     echo '<div class="feedback-item">
                         <div class="feedback-header">
                         <div class="feedback-food">' . htmlspecialchars($row["food_name"]) . '</div>
-                        <div class="feedback-date">' . date("M d, Y", strtotime($row["created_at"])) . '</div>
                         </div>
                         <div class="feedback-rating">
                         <div class="stars">';
@@ -541,7 +540,7 @@ if (!isset($_SESSION['user_id'])) {
                         <div class="rating-count">' . htmlspecialchars($row["rating"]) . '.0</div>
                         </div>
                         <div class="feedback-comment">
-                        ' . htmlspecialchars($row["comment"]) . '
+                        ' . htmlspecialchars($row["feedback"]) . '
                         </div>
                     </div>';
                 }
@@ -585,14 +584,14 @@ if (!isset($_SESSION['user_id'])) {
                             <div>
                                 <label>Your Rating:</label>
                                 <div class="rating">
-                                    <div class="stars">
+                                    <!-- <div class="stars">
                                         <span class="star" onclick="setRating(1)">★</span>
                                         <span class="star" onclick="setRating(2)">★</span>
                                         <span class="star" onclick="setRating(3)">★</span>
                                         <span class="star" onclick="setRating(4)">★</span>
                                         <span class="star" onclick="setRating(5)">★</span>
-                                    </div>
-                                    <input type="hidden" name="rating" id="rating" value="0" required>
+                                    </div> -->
+                                    <input type="number" max="5" min="1" name="rating" id="rating" value="1" required>
                                 </div>
                             </div>
                             
